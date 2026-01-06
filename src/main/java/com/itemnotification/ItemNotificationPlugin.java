@@ -42,7 +42,7 @@ public class ItemNotificationPlugin extends Plugin {
 
 	@Override
 	protected void startUp() throws Exception {
-		panel = new ItemNotificationPanel(itemManager, config, this);
+		panel = new ItemNotificationPanel(config, this);
 
 		// Use a standard icon (using a placeholder buffered image properly would need
 		// ImageUtil but let's use a dummy runnable or load one)

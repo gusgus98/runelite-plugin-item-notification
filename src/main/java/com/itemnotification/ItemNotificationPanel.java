@@ -5,8 +5,7 @@ import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
+import javax.inject.Inject; // Keep Inject
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,14 +13,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.ItemComposition;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
 
 @Slf4j
 public class ItemNotificationPanel extends PluginPanel {
-    private final ItemManager itemManager;
     private final ItemNotificationConfig config;
     private final ItemNotificationPlugin plugin;
 
@@ -29,10 +25,8 @@ public class ItemNotificationPanel extends PluginPanel {
     private final JPanel listContainer = new JPanel();
 
     @Inject
-    public ItemNotificationPanel(ItemManager itemManager, ItemNotificationConfig config,
-            ItemNotificationPlugin plugin) {
+    public ItemNotificationPanel(ItemNotificationConfig config, ItemNotificationPlugin plugin) {
         super();
-        this.itemManager = itemManager;
         this.config = config;
         this.plugin = plugin;
 
