@@ -3,14 +3,37 @@
 A RuneLite plugin that notifies you when specific items of your choice are dropped or spawned on the ground.
 
 ## Features
-- **Watchlist**: Add items to a watched list via the side panel or configuration menu.
-- **Sound Notifications**: Plays a customizable sound (Boop, Level Up, etc.) when a watched item appears.
-- **Search Panel**: Easily search for and manage certain items.
+- **Watchlist**: Easily add items to your watchlist using the side panel or by typing them manually in the config.
+- **Instant Search**: Type in the plugin panel to find items or add new ones to your list instantly.
+- **Sound Notifications**: Choose from a variety of notification sounds:
+    - Boop (Standard RuneLite)
+    - Level Up (Fireworks)
+    - Coin Ding (Grand Exchange)
+    - Tree Falling
+    - **Unique Jingle** (Custom CWA music!)
+- **Volume Control**: Adjust the volume of the notification sound (up to 200%) independently of game volume.
 
 ## Setup
-1. Enable the plugin in RuneLite.
-2. Click the Ruby icon in the sidebar.
-3. Search for items and add them.
+1. **Enable** the plugin in RuneLite (search for "Ground Item Notification").
+2. **Open the Side Panel** (Red Ruby Icon).
+3. **Add Items**:
+    - Type an item name (e.g., "Dragon bones") in the search bar.
+    - Click **"Add 'Dragon bones'"** to track it.
+4. **Configure**:
+    - Open the Plugin Configuration (Cog icon).
+    - Select your preferred **Notification Sound**.
+    - Adjust **Sound Volume** if needed.
+
+## Configuration
+| Setting | Description |
+| :--- | :--- |
+| **Highlighted Items** | A comma-separated list of item names to track (e.g., `Bones, Coins, Twisted bow`). |
+| **Notification Sound** | The sound to play when a tracked item appears. |
+| **Sound Volume** | Volume for custom sounds (0-200%). |
+
+## Troubleshooting
+- **No Sound?** Ensure your "Sound Volume" is not 0% and that you have valid items in your list.
+- **Spelling**: Item names must match the game name exactly (case insensitive).
 
 ## License
 BSD 2-Clause License
