@@ -13,7 +13,7 @@ public interface ItemNotificationConfig extends Config {
 
 	@ConfigItem(keyName = "soundType", name = "Notification Sound", description = "The sound to play when a highlighted item is spawned")
 	default SoundType soundType() {
-		return SoundType.BOOP;
+		return SoundType.UNIQUE_JINGLE;
 	}
 
 	@net.runelite.client.config.Range(min = 0, max = 200)

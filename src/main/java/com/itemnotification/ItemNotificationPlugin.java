@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.config.ConfigManager;
@@ -18,8 +17,6 @@ import net.runelite.client.plugins.PluginDescriptor;
 @Slf4j
 @PluginDescriptor(name = "Ground Item Notification")
 public class ItemNotificationPlugin extends Plugin {
-	@Inject
-	private Client client;
 
 	@Inject
 	private ItemNotificationConfig config;
@@ -33,6 +30,9 @@ public class ItemNotificationPlugin extends Plugin {
 	public void updateConfig(String newItems) {
 		configManager.setConfiguration("itemnotification", "highlightedItems", newItems);
 	}
+
+	@Inject
+	private net.runelite.client.audio.AudioPlayer audioPlayer;
 
 	@Inject
 	private net.runelite.client.ui.ClientToolbar clientToolbar;
@@ -96,45 +96,21 @@ public class ItemNotificationPlugin extends Plugin {
 
 	private void playSound(SoundType soundType) {
 		if (soundType.getResourcePath() != null) {
-			try (java.io.InputStream s = getClass().getResourceAsStream(soundType.getResourcePath())) {
-				if (s == null) {
-					log.warn("Sound file not found: {}", soundType.getResourcePath());
-					return;
-				}
-				try (java.io.InputStream bufferedIn = new java.io.BufferedInputStream(s);
-						javax.sound.sampled.AudioInputStream audioStream = javax.sound.sampled.AudioSystem
-								.getAudioInputStream(bufferedIn)) {
-					javax.sound.sampled.Clip clip = javax.sound.sampled.AudioSystem.getClip();
-					clip.open(audioStream);
+			// Convert percentage to decibels
+			// 100% = 0dB, 200% = ~6dB, 50% = ~-6dB
+			float volume = config.soundVolume();
+			// Prevent log(0) which is -infinity
+			if (volume <= 0) {
+				volume = 0.0001f;
+			}
+			float dB = (float) (20.0 * Math.log10(volume / 100.0));
 
-					// Apply volume if control is supported
-					if (clip.isControlSupported(javax.sound.sampled.FloatControl.Type.MASTER_GAIN)) {
-						javax.sound.sampled.FloatControl gainControl = (javax.sound.sampled.FloatControl) clip
-								.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN);
-
-						// Convert percentage to decibels
-						// 100% = 0dB, 200% = ~6dB, 50% = ~-6dB
-						float volume = config.soundVolume();
-						// Prevent log(0) which is -infinity
-						if (volume <= 0) {
-							volume = 0.0001f;
-						}
-						float dB = (float) (20.0 * Math.log10(volume / 100.0));
-
-						// Clamp to valid range
-						dB = Math.min(dB, gainControl.getMaximum());
-						dB = Math.max(dB, gainControl.getMinimum());
-
-						gainControl.setValue(dB);
-					}
-
-					clip.start();
-				}
+			// Using RuneLite's AudioPlayer to avoid javax.sound usage
+			try {
+				audioPlayer.play(getClass(), soundType.getResourcePath(), dB);
 			} catch (Exception e) {
 				log.warn("Failed to play custom sound", e);
 			}
-		} else {
-			client.playSoundEffect(soundType.getValidSoundId());
 		}
 	}
 

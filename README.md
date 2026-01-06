@@ -5,13 +5,8 @@ A RuneLite plugin that notifies you when specific items of your choice are dropp
 ## Features
 - **Watchlist**: Easily add items to your watchlist using the side panel or by typing them manually in the config.
 - **Instant Search**: Type in the plugin panel to find items or add new ones to your list instantly.
-- **Sound Notifications**: Choose from a variety of notification sounds:
-    - Boop (Standard RuneLite)
-    - Level Up (Fireworks)
-    - Coin Ding (Grand Exchange)
-    - Tree Falling
-    - **Unique Jingle** (Custom CWA music!)
-- **Volume Control**: Adjust the volume of the notification sound (up to 200%) independently of game volume.
+- **Sound Notifications**: Plays a unique, distinctive jingle when items are detected ("Unique Jingle").
+- **Volume Control**: Adjust notification volume independently of game sounds (up to 200%).
 
 ## Setup
 1. **Enable** the plugin in RuneLite (search for "Ground Item Notification").
