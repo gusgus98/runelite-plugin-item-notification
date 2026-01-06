@@ -43,7 +43,7 @@ tasks.withType(Test) {
 
 tasks.register('run', JavaExec) {
 	classpath = sourceSets.test.runtimeClasspath
-	mainClass = 'com.itemnotification.ItemNotificationPluginTest'
+	mainClass = 'com.itemnotification.PluginLauncher'
 
 	jvmArgs "-ea"
 	args "--developer-mode", "--debug", "--insecure-write-credentials"

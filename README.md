@@ -1,4 +1,4 @@
-# Item Notification Plugin
+# Ground Item Notification
 
 A RuneLite plugin that notifies you when specific items of your choice are dropped or spawned on the ground.
 

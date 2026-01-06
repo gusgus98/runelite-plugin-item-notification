@@ -47,13 +47,27 @@ public class ItemNotificationPanel extends PluginPanel {
         searchBar.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 20, 30));
         searchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         searchBar.setToolTipText("Search for an item to add...");
-        searchBar.addActionListener(e -> search(searchBar.getText()));
+        // Live search/filter
+        searchBar.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                search(searchBar.getText());
+            }
 
-        JButton searchButton = new JButton("Search");
-        searchButton.addActionListener(e -> search(searchBar.getText()));
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                search(searchBar.getText());
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                search(searchBar.getText());
+            }
+        });
+        searchBar.addActionListener(e -> addItem(searchBar.getText())); // Enter adds item
+
+        JButton addButton = new JButton("Add");
+        addButton.addActionListener(e -> addItem(searchBar.getText()));
 
         searchContainer.add(searchBar, BorderLayout.CENTER);
-        searchContainer.add(searchButton, BorderLayout.EAST);
+        searchContainer.add(addButton, BorderLayout.EAST);
         add(searchContainer, BorderLayout.NORTH);
 
         // List Container
@@ -103,58 +117,37 @@ public class ItemNotificationPanel extends PluginPanel {
     }
 
     private void search(String query) {
-        if (query == null || query.isEmpty()) {
-            updateList();
-            return;
-        }
-
         listContainer.removeAll();
 
-        // In a real plugin we would use ItemManager.search(query) but that returns IDs.
-        // For simplicity/demo we might assume exact logic or use searcher.
-        // Wait, ItemManager.search() returns List<ItemPrice> which isn't quite right
-        // for names.
-        // Actually typical way is iterating cache or using existing search.
-        // Since we don't have easy cache access here without more boilerplate,
-        // I'll simulate a "Search" that just adds the item if you type it,
-        // OR simpler: we rely on user typing exact name in search bar to ADD it.
-        // Wait, user asked for SEARCH.
-        // Let's implement a verify via ItemManager:
-        // We CAN search via client.getItemComposition(id) loops, but that's slow.
-        // Let's assume for this "v1" search bar behaves like "Add this item".
-        // But better: use ItemManager.search(String) if available?
-        // In the available API (1.9.x), ItemManager.search(String) returns
-        // List<ItemPrice> which has names!
+        // 1. Show "Add New" button if we have text
+        if (query != null && !query.isEmpty()) {
+            JPanel addPanel = new JPanel(new BorderLayout());
+            addPanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+            addPanel.setBorder(new EmptyBorder(5, 5, 10, 5));
+            addPanel.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 40));
 
-        try {
-            List<ItemComposition> results = itemManager.search(query).stream()
-                    .map(itemPrice -> itemManager.getItemComposition(itemPrice.getId()))
-                    .limit(10)
-                    .collect(Collectors.toList());
+            JButton addBtn = new JButton("Add '" + query + "'");
+            addBtn.addActionListener(e -> addItem(query));
+            addPanel.add(addBtn, BorderLayout.CENTER);
 
-            if (results.isEmpty()) {
-                listContainer.add(new JLabel("No results found."));
-            } else {
-                for (ItemComposition item : results) {
-                    JPanel resultPanel = new JPanel(new BorderLayout());
-                    resultPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
-                    resultPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-                    resultPanel.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 40));
+            listContainer.add(addPanel);
+        }
 
-                    JLabel label = new JLabel(item.getName() + " (ID: " + item.getId() + ")");
-                    JButton addBtn = new JButton("+");
-                    addBtn.addActionListener(e -> addItem(item.getName()));
+        // 2. Filter existing items
+        String highlightedItems = config.highlightedItems();
+        if (highlightedItems != null && !highlightedItems.isEmpty()) {
+            String[] items = highlightedItems.split(",");
 
-                    resultPanel.add(label, BorderLayout.CENTER);
-                    resultPanel.add(addBtn, BorderLayout.EAST);
+            for (String item : items) {
+                String trimmed = item.trim();
+                if (trimmed.isEmpty())
+                    continue;
 
-                    listContainer.add(resultPanel);
+                // If query is empty, show all. If not, fuzzy match.
+                if (query == null || query.isEmpty() || trimmed.toLowerCase().contains(query.toLowerCase())) {
+                    listContainer.add(createItemPanel(trimmed));
                 }
             }
-        } catch (Exception e) {
-            // Fallback if search fails/API mismatch
-            addItem(query);
-            updateList();
         }
 
         listContainer.revalidate();

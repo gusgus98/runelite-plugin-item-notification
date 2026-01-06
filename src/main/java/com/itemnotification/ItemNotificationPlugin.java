@@ -16,7 +16,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
 @Slf4j
-@PluginDescriptor(name = "Item Notification")
+@PluginDescriptor(name = "Ground Item Notification")
 public class ItemNotificationPlugin extends Plugin {
 	@Inject
 	private Client client;
@@ -74,21 +74,24 @@ public class ItemNotificationPlugin extends Plugin {
 		final ItemComposition itemComposition = itemManager.getItemComposition(itemId);
 		final String itemName = itemComposition.getName();
 
-		final String highlightedItems = config.highlightedItems();
+		if (isItemHighlighted(itemName, config.highlightedItems())) {
+			log.info("Highlighted item spawned: {}", itemName);
+			playSound(config.soundType());
+		}
+	}
+
+	// Visible for testing
+	boolean isItemHighlighted(String itemName, String highlightedItems) {
 		if (highlightedItems == null || highlightedItems.isEmpty()) {
-			return;
+			return false;
 		}
 
-		// Split by comma and trim
 		List<String> itemsToNotify = Arrays.stream(highlightedItems.split(","))
 				.map(String::trim)
 				.map(String::toLowerCase)
 				.collect(Collectors.toList());
 
-		if (itemsToNotify.contains(itemName.toLowerCase())) {
-			log.info("Highlighted item spawned: {}", itemName);
-			playSound(config.soundType());
-		}
+		return itemsToNotify.contains(itemName.toLowerCase());
 	}
 
 	private void playSound(SoundType soundType) {
