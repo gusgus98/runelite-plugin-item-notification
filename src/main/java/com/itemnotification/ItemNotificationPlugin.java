@@ -103,6 +103,28 @@ public class ItemNotificationPlugin extends Plugin {
 								.getAudioInputStream(bufferedIn)) {
 					javax.sound.sampled.Clip clip = javax.sound.sampled.AudioSystem.getClip();
 					clip.open(audioStream);
+
+					// Apply volume if control is supported
+					if (clip.isControlSupported(javax.sound.sampled.FloatControl.Type.MASTER_GAIN)) {
+						javax.sound.sampled.FloatControl gainControl = (javax.sound.sampled.FloatControl) clip
+								.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN);
+
+						// Convert percentage to decibels
+						// 100% = 0dB, 200% = ~6dB, 50% = ~-6dB
+						float volume = config.soundVolume();
+						// Prevent log(0) which is -infinity
+						if (volume <= 0) {
+							volume = 0.0001f;
+						}
+						float dB = (float) (20.0 * Math.log10(volume / 100.0));
+
+						// Clamp to valid range
+						dB = Math.min(dB, gainControl.getMaximum());
+						dB = Math.max(dB, gainControl.getMinimum());
+
+						gainControl.setValue(dB);
+					}
+
 					clip.start();
 				}
 			} catch (Exception e) {

@@ -15,4 +15,11 @@ public interface ItemNotificationConfig extends Config {
 	default SoundType soundType() {
 		return SoundType.BOOP;
 	}
+
+	@net.runelite.client.config.Range(min = 0, max = 200)
+	@ConfigItem(keyName = "soundVolume", name = "Sound Volume", description = "Volume of the custom sound (0-200%)")
+	@net.runelite.client.config.Units(net.runelite.client.config.Units.PERCENT)
+	default int soundVolume() {
+		return 100;
+	}
 }
