@@ -10,7 +10,9 @@ import net.runelite.api.ItemComposition;
 import net.runelite.api.events.ItemSpawned;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.NpcLootReceived;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.game.ItemStack;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 
@@ -68,8 +70,18 @@ public class ItemNotificationPlugin extends Plugin {
 		log.info("Item Notification stopped!");
 	}
 
+	/**
+	 * Handles ALL items spawning on the ground.
+	 * Only used when "Only My Drops" is OFF - notifies for any highlighted item
+	 * that appears on the ground, regardless of who dropped it.
+	 */
 	@Subscribe
 	public void onItemSpawned(ItemSpawned itemSpawned) {
+		// Skip if "Only My Drops" is enabled - we use NpcLootReceived instead
+		if (config.onlyMyDrops()) {
+			return;
+		}
+
 		final int itemId = itemSpawned.getItem().getId();
 		final ItemComposition itemComposition = itemManager.getItemComposition(itemId);
 		final String itemName = itemComposition.getName();
@@ -77,6 +89,31 @@ public class ItemNotificationPlugin extends Plugin {
 		if (isItemHighlighted(itemName, config.highlightedItems())) {
 			log.info("Highlighted item spawned: {}", itemName);
 			playSound(config.soundType());
+		}
+	}
+
+	/**
+	 * Handles loot from NPCs YOU killed - this event is ONLY fired for your own
+	 * drops.
+	 * Used when "Only My Drops" is ON - guaranteed to be loot from your kills only.
+	 */
+	@Subscribe
+	public void onNpcLootReceived(NpcLootReceived event) {
+		// Skip if "Only My Drops" is disabled - we use ItemSpawned instead
+		if (!config.onlyMyDrops()) {
+			return;
+		}
+
+		for (ItemStack item : event.getItems()) {
+			final ItemComposition itemComposition = itemManager.getItemComposition(item.getId());
+			final String itemName = itemComposition.getName();
+
+			if (isItemHighlighted(itemName, config.highlightedItems())) {
+				log.info("Highlighted item received from NPC kill: {}", itemName);
+				playSound(config.soundType());
+				// Only play sound once per loot event, even if multiple highlighted items drop
+				return;
+			}
 		}
 	}
 
