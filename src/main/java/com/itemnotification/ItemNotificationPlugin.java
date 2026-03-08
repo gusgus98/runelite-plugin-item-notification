@@ -46,11 +46,7 @@ public class ItemNotificationPlugin extends Plugin {
 	protected void startUp() throws Exception {
 		panel = new ItemNotificationPanel(config, this);
 
-		// Use a standard icon (using a placeholder buffered image properly would need
-		// ImageUtil but let's use a dummy runnable or load one)
-		// For simplicity, we'll try to load the Ruby Item ID image.
-		@SuppressWarnings("deprecation")
-		final java.awt.image.BufferedImage icon = itemManager.getImage(net.runelite.api.ItemID.RUBY);
+		final java.awt.image.BufferedImage icon = net.runelite.client.util.ImageUtil.loadImageResource(ItemNotificationPlugin.class, "/item_notification_icon.png");
 
 		navButton = net.runelite.client.ui.NavigationButton.builder()
 				.tooltip("Item Notifications")
